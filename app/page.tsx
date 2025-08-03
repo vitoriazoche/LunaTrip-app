@@ -479,9 +479,13 @@ export default function HomePage() {
               <span className="text-xs">Início</span>
             </Button>
 
-            <Button variant="ghost" className="flex flex-col items-center space-y-1 text-gray-500">
+            <Button
+              variant="ghost"
+              className="flex flex-col items-center space-y-1 text-gray-500"
+              onClick={() => (window.location.href = "/meu-ciclo")}
+            >
               <Heart className="w-5 h-5" />
-              <span className="text-xs">Menstruação</span>
+              <span className="text-xs">Meu Ciclo</span>
             </Button>
 
             <Button variant="ghost" className="flex flex-col items-center space-y-1 text-gray-500">

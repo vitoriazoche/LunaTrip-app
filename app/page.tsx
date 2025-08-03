@@ -396,6 +396,12 @@ export default function HomePage() {
             {filteredTrips.map((trip) => (
               <Card key={trip.id} className="bg-white border-pink-100 shadow-sm">
                 <CardContent className="p-4">
+                  {/* Date */}
+                  <div className="flex items-center space-x-2 mb-3">
+                    <Calendar className="w-4 h-4 text-gray-400" />
+                    <span className="text-sm text-gray-600">{trip.date}</span>
+                  </div>
+
                   {/* Airline and Flight Number */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-2">
@@ -438,33 +444,26 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* Date and Check-in */}
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                    <div className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-600">{trip.date}</span>
-                    </div>
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 pt-3 border-t border-gray-100">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-gray-600 hover:bg-gray-50 bg-gray-100"
+                      onClick={() => (window.location.href = `/trip-notes/${trip.id}`)}
+                    >
+                      Minhas anotações
+                    </Button>
 
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-gray-600 hover:bg-gray-50"
-                        onClick={() => (window.location.href = `/trip-notes/${trip.id}`)}
-                      >
-                        Minhas anotações
-                      </Button>
-
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-pink-200 text-pink-600 hover:bg-pink-50 bg-transparent"
-                        onClick={() => window.open(trip.checkInUrl, "_blank")}
-                      >
-                        <ExternalLink className="w-3 h-3 mr-1" />
-                        Check-in
-                      </Button>
-                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-pink-200 text-pink-600 hover:bg-pink-50 bg-transparent"
+                      onClick={() => window.open(trip.checkInUrl, "_blank")}
+                    >
+                      <ExternalLink className="w-3 h-3 mr-1" />
+                      Check-in
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

@@ -121,3 +121,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom scrollbar styles for horizontal scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Animation for caret blink */
+@keyframes caret-blink {
+  0%, 70% { opacity: 1; }
+  71%, 100% { opacity: 0; }
+}
+
+.animate-caret-blink {
+  animation: caret-blink 1s ease-out infinite;
+}

@@ -1,24 +1,90 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowLeft, Search, X } from "lucide-react"
+import { ArrowLeft, Search, X, Plus, Edit, Trash2, Scale, BoxIcon as Bottle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+
+interface Partner {
+  id: string
+  name: string
+  source: string
+  time: string
+  protection: "com" | "sem"
+}
 
 export default function ActivityPage() {
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState("")
-  const [partnerName, setPartnerName] = useState("")
-  const [partnerSource, setPartnerSource] = useState("")
-  const [partnerTime, setPartnerTime] = useState("")
+  const [partners, setPartners] = useState<Partner[]>([
+    {
+      id: "1",
+      name: "João",
+      source: "Tinder",
+      time: "14:30",
+      protection: "com",
+    },
+  ])
+  const [editingPartner, setEditingPartner] = useState<Partner | null>(null)
+  const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false)
+  const [newPartner, setNewPartner] = useState<Omit<Partner, "id">>({
+    name: "",
+    source: "",
+    time: "",
+    protection: "com",
+  })
   const [notes, setNotes] = useState("")
   const [weight, setWeight] = useState("")
   const [waterIntake, setWaterIntake] = useState("")
 
   const toggleSelection = (item: string) => {
     setSelectedItems((prev) => (prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]))
+  }
+
+  const addPartner = () => {
+    if (newPartner.name && newPartner.time) {
+      const partner: Partner = {
+        ...newPartner,
+        id: Date.now().toString(),
+      }
+      setPartners([...partners, partner])
+      setNewPartner({ name: "", source: "", time: "", protection: "com" })
+      setIsPartnerModalOpen(false)
+    }
+  }
+
+  const editPartner = (partner: Partner) => {
+    setEditingPartner(partner)
+    setNewPartner({
+      name: partner.name,
+      source: partner.source,
+      time: partner.time,
+      protection: partner.protection,
+    })
+    setIsPartnerModalOpen(true)
+  }
+
+  const updatePartner = () => {
+    if (editingPartner && newPartner.name && newPartner.time) {
+      setPartners(partners.map((p) => (p.id === editingPartner.id ? { ...editingPartner, ...newPartner } : p)))
+      setEditingPartner(null)
+      setNewPartner({ name: "", source: "", time: "", protection: "com" })
+      setIsPartnerModalOpen(false)
+    }
+  }
+
+  const deletePartner = (id: string) => {
+    setPartners(partners.filter((p) => p.id !== id))
+  }
+
+  const resetPartnerModal = () => {
+    setEditingPartner(null)
+    setNewPartner({ name: "", source: "", time: "", protection: "com" })
+    setIsPartnerModalOpen(false)
   }
 
   const categories = {
@@ -174,28 +240,119 @@ export default function ActivityPage() {
         {/* Partner Information */}
         <Card className="bg-white border-pink-100">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-medium text-gray-800">Parceiro(s)</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base font-medium text-gray-800">Parceiro</CardTitle>
+              <Dialog open={isPartnerModalOpen} onOpenChange={setIsPartnerModalOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    className="bg-pink-500 hover:bg-pink-600 text-white"
+                    onClick={() => resetPartnerModal()}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Parceiro
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>{editingPartner ? "Editar Parceiro" : "Adicionar Parceiro"}</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <Input
+                      placeholder="Nome do parceiro"
+                      value={newPartner.name}
+                      onChange={(e) => setNewPartner({ ...newPartner, name: e.target.value })}
+                      className="border-pink-200 focus:border-pink-400 focus:ring-pink-400"
+                    />
+                    <Input
+                      placeholder="De onde conhece"
+                      value={newPartner.source}
+                      onChange={(e) => setNewPartner({ ...newPartner, source: e.target.value })}
+                      className="border-pink-200 focus:border-pink-400 focus:ring-pink-400"
+                    />
+                    <Input
+                      type="time"
+                      placeholder="Horário"
+                      value={newPartner.time}
+                      onChange={(e) => setNewPartner({ ...newPartner, time: e.target.value })}
+                      className="border-pink-200 focus:border-pink-400 focus:ring-pink-400"
+                    />
+                    <Select
+                      value={newPartner.protection}
+                      onValueChange={(value: "com" | "sem") => setNewPartner({ ...newPartner, protection: value })}
+                    >
+                      <SelectTrigger className="border-pink-200 focus:border-pink-400 focus:ring-pink-400">
+                        <SelectValue placeholder="Proteção" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="com">Com camisinha</SelectItem>
+                        <SelectItem value="sem">Sem camisinha</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={editingPartner ? updatePartner : addPartner}
+                        className="flex-1 bg-pink-500 hover:bg-pink-600 text-white"
+                      >
+                        {editingPartner ? "Atualizar" : "Adicionar"}
+                      </Button>
+                      <Button variant="outline" onClick={resetPartnerModal} className="flex-1 bg-transparent">
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           </CardHeader>
-          <CardContent className="pt-0 space-y-3">
-            <Input
-              placeholder="Nome do parceiro"
-              value={partnerName}
-              onChange={(e) => setPartnerName(e.target.value)}
-              className="border-pink-200 focus:border-pink-400 focus:ring-pink-400"
-            />
-            <Input
-              placeholder="De onde conhece"
-              value={partnerSource}
-              onChange={(e) => setPartnerSource(e.target.value)}
-              className="border-pink-200 focus:border-pink-400 focus:ring-pink-400"
-            />
-            <Input
-              type="time"
-              placeholder="Horário"
-              value={partnerTime}
-              onChange={(e) => setPartnerTime(e.target.value)}
-              className="border-pink-200 focus:border-pink-400 focus:ring-pink-400"
-            />
+          <CardContent className="pt-0">
+            {partners.length > 0 ? (
+              <div className="space-y-2">
+                {partners.map((partner) => (
+                  <div key={partner.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-1 grid grid-cols-3 gap-2 text-sm">
+                      <div>
+                        <span className="font-medium">{partner.time}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-700">{partner.name}</span>
+                        {partner.source && <span className="text-gray-500 text-xs block">({partner.source})</span>}
+                      </div>
+                      <div>
+                        <Badge
+                          variant="secondary"
+                          className={
+                            partner.protection === "com" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                          }
+                        >
+                          {partner.protection === "com" ? "Com camisinha" : "Sem camisinha"}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="flex gap-1 ml-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => editPartner(partner)}
+                        className="h-8 w-8 p-0 text-gray-500 hover:text-pink-600"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => deletePartner(partner.id)}
+                        className="h-8 w-8 p-0 text-gray-500 hover:text-red-600"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-sm text-center py-4">Nenhum parceiro adicionado</p>
+            )}
           </CardContent>
         </Card>
 
@@ -203,7 +360,10 @@ export default function ActivityPage() {
         <div className="grid grid-cols-2 gap-4">
           <Card className="bg-white border-pink-100">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-800">Peso (kg)</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-800 flex items-center gap-2">
+                <Scale className="w-4 h-4 text-gray-500" />
+                Peso (kg)
+              </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               <Input
@@ -218,7 +378,10 @@ export default function ActivityPage() {
 
           <Card className="bg-white border-pink-100">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-gray-800">Água (copos)</CardTitle>
+              <CardTitle className="text-sm font-medium text-gray-800 flex items-center gap-2">
+                <Bottle className="w-4 h-4 text-gray-500" />
+                Água (300ml)
+              </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               <Input
